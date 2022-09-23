@@ -1,0 +1,114 @@
+#!/bin/bash
+
+Help() {
+    echo "
+Creates a tar.gz backup with date/time in the file name.
+
+    Required Information:
+    - included files/dirs       [<BACKUP_NAME>.include]
+    - excluded files/dirs       [<BACKUP_NAME>.exclude]
+    - destination directory     [export BACKUP_DESTINATION=..]
+    - backup name               [argument -n]
+
+    Setup:
+        - Create two files with the same prefix
+          suffix should be .include and .exclude accordingly
+            Ex.
+                mybackup.include
+                mybackup.exclude
+        - Set the destination path
+            export BACKUP_DESTINATION=<location to store backups>
+            Ex.
+                export BACKUP_DESTINATION=\$HOME/mybackups
+        - Execute backup with prefix
+            Ex.
+                backup -n mybackup
+
+    Usage:
+        param: [-h] Display this help
+        param: [-n] Name of the backup
+"
+}
+
+ShortHelp() {
+    echo "
+    Usage:
+        backup <arg1, arg2, ..>
+    Arguments:
+        -h, help
+        -n <name>, name of the backup
+"
+}
+
+CheckInputs() {
+    if [ -z $BACKUP_DESTINATION ]; then
+        echo "Environment variable BACKUP_DESTINATION is not set"
+        echo "Using current working directory $PWD"
+        BACKUP_DESTINATION="."
+    fi
+
+    if [ ! -d $BACKUP_DESTINATION ]; then
+        echo "Backup destination does not exist: $BACKUP_DESTINATION"
+        echo "Attempting to create.."
+        mkdir -p $BACKUP_DESTINATION
+        if [ $? -ne 0 ]; then
+            exit 1
+        else
+            echo "Created directory at $BACKUP_DESTINATION"
+        fi
+    fi
+
+    if [ -z $BACKUP_NAME ]; then
+        echo "Missing required argument -n (name)"
+        exit 1
+    fi
+
+    if [ ! -f "$BACKUP_NAME.include" ]; then
+        echo "Missing include file $BACKUP_NAME.include"
+        exit 1
+    fi
+
+    if [ ! -f "$BACKUP_NAME.exclude" ]; then
+        touch "$BACKUP_NAME.exclude"
+    fi
+}
+
+Main() {
+    DATE_TIME=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_PATH=${BACKUP_DESTINATION}/${FILE_PREFIX}${DATE_TIME}${BACKUP_EXT}
+    tar \
+        --create \
+        --gzip \
+        --verbose \
+        --file=$BACKUP_PATH \
+        --exclude-from=$BACKUP_NAME.exclude \
+        --files-from=$BACKUP_NAME.include
+    echo
+    echo "Created backup at: $BACKUP_PATH"
+    echo
+}
+
+
+declare BACKUP_EXT=".tar.gz"
+declare BACKUP_NAME=""
+
+while getopts ":hn:" option; do
+    case $option in
+        h) # display Help
+            Help
+            exit
+            ;;
+        n) # backup name
+            BACKUP_NAME=$OPTARG
+            ;;
+        \?)
+            echo "Unknown argument(s) supplied"
+            ShortHelp
+            exit 1
+    esac
+done
+
+CheckInputs
+Main
+
+exit 0
