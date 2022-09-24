@@ -75,7 +75,7 @@ CheckInputs() {
 
 Main() {
     DATE_TIME=$(date +"%Y%m%d_%H%M%S")
-    BACKUP_PATH=${BACKUP_DESTINATION}/${FILE_PREFIX}${DATE_TIME}${BACKUP_EXT}
+    BACKUP_PATH=${BACKUP_DESTINATION}/${BACKUP_NAME}${DATE_TIME}${BACKUP_EXT}
     tar \
         --create \
         --gzip \
