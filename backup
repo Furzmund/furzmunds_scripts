@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# Have location that stores the config files
+# 1. create a config
+#   prompt for values and save
+# view, edit, delete, list, run
+#
+# declare TITLE="Example Backup"
+# declare DESCRIPTION="This is just an example."
+# declare BACKUP_NAME="example_backup"
+# declare BACKUP_TYPE="ARCHIVE" # or SYNC
+# declare SOURCE="*"
+# declare DESTINATION="$HOME/mybackups"
+# declare WORKING_PATH="$HOME/Pictures"
+# declare EXCLUDE='Screenshots'
+
 Help() {
     echo "
 Creates a tar.gz backup with date/time in the file name.
@@ -7,7 +21,7 @@ Creates a tar.gz backup with date/time in the file name.
     Required Information:
     - included files/dirs       [<BACKUP_NAME>.include]
     - excluded files/dirs       [<BACKUP_NAME>.exclude]
-    - destination directory     [export BACKUP_DESTINATION=..]
+    - destination directory     [export DESTINATION=..]
     - backup name               [argument -n]
 
     Setup:
@@ -17,9 +31,9 @@ Creates a tar.gz backup with date/time in the file name.
                 mybackup.include
                 mybackup.exclude
         - Set the destination path
-            export BACKUP_DESTINATION=<location to store backups>
+            export DESTINATION=<location to store backups>
             Ex.
-                export BACKUP_DESTINATION=\$HOME/mybackups
+                export DESTINATION=\$HOME/mybackups
         - Execute backup with prefix
             Ex.
                 backup -n mybackup
@@ -29,6 +43,7 @@ Creates a tar.gz backup with date/time in the file name.
         param: [-n] Name of the backup
 "
 }
+
 
 ShortHelp() {
     echo "
@@ -40,75 +55,111 @@ ShortHelp() {
 "
 }
 
-CheckInputs() {
-    if [ -z $BACKUP_DESTINATION ]; then
-        echo "Environment variable BACKUP_DESTINATION is not set"
-        echo "Using current working directory $PWD"
-        BACKUP_DESTINATION="."
-    fi
 
-    if [ ! -d $BACKUP_DESTINATION ]; then
-        echo "Backup destination does not exist: $BACKUP_DESTINATION"
-        echo "Attempting to create.."
-        mkdir -p $BACKUP_DESTINATION
-        if [ $? -ne 0 ]; then
+CheckInputs() {
+    echo "  Validating backup parameters.."
+    if [ -z $BACKUP_TYPE ]; then
+        echo "Error - Missing required backup type"
+    else
+        if [ ! $BACKUP_TYPE = "ARCHIVE" ] && [ ! $BACKUP_TYPE = "SYNC" ]; then
+            echo "Error - Invalid backup type: $BACKUP_TYPE"
+            echo "  Valid types: ARCHIVE or SYNC"
             exit 1
-        else
-            echo "Created directory at $BACKUP_DESTINATION"
         fi
     fi
 
-    if [ -z $BACKUP_NAME ]; then
-        echo "Missing required argument -n (name)"
+    if [ -z "$SOURCE" ]; then
+        echo "  Error - Missing required source"
         exit 1
     fi
 
-    if [ ! -f "$BACKUP_NAME.include" ]; then
-        echo "Missing include file $BACKUP_NAME.include"
+    if [ -z $DESTINATION ]; then
+        echo "Error - Missing required destination"
         exit 1
+    elif [ ! -d $DESTINATION ]; then
+        echo "  Backup destination does not exist. Attempting to create:"
+        echo "    $DESTINATION"
+        mkdir -p $DESTINATION
+        if [ $? -ne 0 ]; then
+            echo "Error - Unable to create destination path: $DESTINATION"
+            exit 1
+        else
+            echo "    Created directory at $DESTINATION"
+        fi
     fi
 
-    if [ ! -f "$BACKUP_NAME.exclude" ]; then
-        touch "$BACKUP_NAME.exclude"
+    if [ -z $WORKING_PATH ]; then
+        # If no working path, then the source must be an absolute path
+        if [ ! -d $SOURCE ]; then
+            echo "Error - Source does not exist or is a relative path:"
+            echo "  $SOURCE"
+            echo "  Either add a working directory or enter an existing source path"
+            exit 1
+        fi
+    else
+        # tar --directory or -C does not work when source is a pattern
+        cd $WORKING_PATH
     fi
 }
 
-Main() {
-    DATE_TIME=$(date +"%Y%m%d_%H%M%S")
-    BACKUP_PATH=${BACKUP_DESTINATION}/${BACKUP_NAME}${DATE_TIME}${BACKUP_EXT}
+
+ArchiveBackup() {
     tar \
         --create \
         --gzip \
         --verbose \
         --file=$BACKUP_PATH \
-        --exclude-from=$BACKUP_NAME.exclude \
-        --files-from=$BACKUP_NAME.include
-    echo
-    echo "Created backup at: $BACKUP_PATH"
-    echo
+        --exclude=$EXCLUDE \
+        $SOURCE
+    if [ $? -eq 0 ]; then
+        echo "Backup file saved to"
+        echo $BACKUP_PATH
+    else
+        echo "Error - creating backup file"
+    fi
 }
 
 
+SyncBackup() {
+    echo "Sync backup, coming to a Linux distro near you!"
+}
+
+
+##############################################
+#                    Main                    #
+##############################################
 declare BACKUP_EXT=".tar.gz"
-declare BACKUP_NAME=""
+declare DATE_TIME=$(date +"%Y%m%d_%H%M%S")
 
-while getopts ":hn:" option; do
-    case $option in
-        h) # display Help
-            Help
-            exit
-            ;;
-        n) # backup name
-            BACKUP_NAME=$OPTARG
-            ;;
-        \?)
-            echo "Unknown argument(s) supplied"
-            ShortHelp
-            exit 1
-    esac
-done
+if [ $# -eq 0 ]; then
+    echo "Where are the arguments?"
+    exit 1
+elif [ $# -eq 1 ]; then
+    if [ ! -f $1 ]; then
+        echo "Error - Backup config file does not exist:"
+        echo "  $1"
+        exit 1
+    fi
+else
+    echo "You don't know how to use this, do you?"
+    exit 1
+fi
 
+echo "Starting backup.."
+
+source $1
 CheckInputs
-Main
+BACKUP_PATH=${DESTINATION}/${BACKUP_NAME}_${DATE_TIME}${BACKUP_EXT}
+
+echo "  Title: $TITLE"
+echo "  Description: $DESCRIPTION"
+
+if [ $BACKUP_TYPE = "ARCHIVE" ]; then
+    ArchiveBackup
+elif [ $BACKUP_TYPE = "SYNC " ]; then
+    SyncBackup
+else
+    echo "Error - Invalid backup type: $BACKUP_TYPE"
+fi
 
 exit 0
