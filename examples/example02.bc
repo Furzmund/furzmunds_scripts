@@ -1,0 +1,8 @@
+declare TITLE="Example Backup 2"
+declare DESCRIPTION="This is just an example."
+declare BACKUP_NAME="example2"
+declare BACKUP_TYPE="SYNC"
+declare SOURCE="$HOME/Pictures"
+declare DESTINATION="$HOME/mybackups"
+declare WORKING_PATH=""
+declare EXCLUDE=""
