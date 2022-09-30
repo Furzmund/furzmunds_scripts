@@ -104,6 +104,7 @@ CheckInputs() {
 
 
 ArchiveBackup() {
+    echo "Starting archive backup.."
     tar \
         --create \
         --gzip \
@@ -112,8 +113,8 @@ ArchiveBackup() {
         --exclude=$EXCLUDE \
         $SOURCE
     if [ $? -eq 0 ]; then
-        echo "Backup file saved to"
-        echo $BACKUP_PATH
+        echo "Backup complete. File saved to"
+        echo "  $BACKUP_PATH"
     else
         echo "Error - creating backup file"
     fi
@@ -131,6 +132,7 @@ SyncBackup() {
 declare BACKUP_EXT=".tar.gz"
 declare DATE_TIME=$(date +"%Y%m%d_%H%M%S")
 
+# Check arguments
 if [ $# -eq 0 ]; then
     echo "Where are the arguments?"
     exit 1
@@ -140,14 +142,15 @@ elif [ $# -eq 1 ]; then
         echo "  $1"
         exit 1
     fi
+    BACKUP_FILE=$1
 else
     echo "You don't know how to use this, do you?"
     exit 1
 fi
 
-echo "Starting backup.."
+echo "Setting up backup.."
 
-source $1
+source $BACKUP_FILE
 CheckInputs
 BACKUP_PATH=${DESTINATION}/${BACKUP_NAME}_${DATE_TIME}${BACKUP_EXT}
 
