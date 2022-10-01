@@ -1,8 +1,12 @@
-declare TITLE="Example Backup 2"
-declare DESCRIPTION="This is just an example."
-declare BACKUP_NAME="example2"
+# Sync Example
+# This will sync the mydocs directory and its contents
+# to a copy of inside the myhome directory
+
+declare TITLE="Sync Example"
+declare DESCRIPTION="Configuration example of synchronisation"
+declare BACKUP_NAME="example02"
 declare BACKUP_TYPE="SYNC"
-declare SOURCE="$HOME/Pictures"
-declare DESTINATION="$HOME/mybackups"
-declare WORKING_PATH=""
-declare EXCLUDE=""
+declare SOURCE="mydocs"
+declare DESTINATION="myhome"
+declare WORKING_PATH="$PWD"
+declare EXCLUDE_FILE="$PWD/examples/example02.x"
