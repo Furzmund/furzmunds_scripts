@@ -1,26 +1,5 @@
 #!/bin/bash
 
-# Have location that stores the config files
-# 1. create a config
-#   prompt for values and save
-# view, edit, delete, list, run
-
-# potional:
-#     backup config file
-# options:
-#   -n, --no-dry-run (sync only)
-#   -r, --reverse (sync only)
-# maybe overrides for backups
-
-# declare TITLE="Example Backup"
-# declare DESCRIPTION="This is just an example."
-# declare BACKUP_NAME="example_backup"
-# declare BACKUP_TYPE="ARCHIVE" # or SYNC
-# declare SOURCE="*"
-# declare DESTINATION="$HOME/mybackups"
-# declare WORKING_PATH="$HOME/Pictures"
-# declare EXCLUDE='Screenshots'
-
 ParseArgs() {
     while test $# -gt 0; do
         _KEY="$1"
@@ -33,14 +12,14 @@ ParseArgs() {
                 exit 0
                 ;;
             -v|--version)
-                echo "put version here"
+                Version
                 exit 0
                 ;;
             -*|--*)
                 echo "Unknown argument: $_KEY"
                 exit 1
                 ;;
-            *)  # One positional, backup file
+            *)  # One positional argument
                 BACKUP_CONFIG=$1
                 if [ ! -f $BACKUP_CONFIG ]; then
                     echo "Backup configuration file not found: $BACKUP_CONFIG"
@@ -55,45 +34,20 @@ ParseArgs() {
 
 Help() {
     echo "
-Creates a tar.gz backup with date/time in the file name.
+Performs backups either by archiving files (tar.gz) or
+by synching files between two locations (rsync).
 
-    Required Information:
-    - included files/dirs       [<BACKUP_NAME>.include]
-    - excluded files/dirs       [<BACKUP_NAME>.exclude]
-    - destination directory     [export DESTINATION=..]
-    - backup name               [argument -n]
-
-    Setup:
-        - Create two files with the same prefix
-          suffix should be .include and .exclude accordingly
-            Ex.
-                mybackup.include
-                mybackup.exclude
-        - Set the destination path
-            export DESTINATION=<location to store backups>
-            Ex.
-                export DESTINATION=\$HOME/mybackups
-        - Execute backup with prefix
-            Ex.
-                backup -n mybackup
-
-    Usage:
-        param: [-h] Display this help
-        param: [-n] Name of the backup
+Usage:
+    -h, --help          Display this help
+    -n, --no-dry-run    Skip dry-run when synching
+    -v, --version       Display the version
 "
 }
 
 
-ShortHelp() {
-    echo "
-    Usage:
-        backup <arg1, arg2, ..>
-    Arguments:
-        -h, help
-        -n <name>, name of the backup
-"
+Version() {
+    echo "Furzmund Backup v0.0.1"
 }
-
 
 CheckInputs() {
     # Validate configuration file inputs
@@ -163,7 +117,6 @@ ArchiveBackup() {
 
 SyncBackup() {
     echo "Starting sync.."
-    #rsync -avhn --exclude-from exclude.lst --delete-after /media/orth/backup/Library/ /mnt/shared/Library/ | tee $HOME/Desktop/log.txt
     rsync \
         --archive \
         --delete-after \
