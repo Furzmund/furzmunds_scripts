@@ -1,9 +1,8 @@
-TITLE="Example Archive Backup"
-DESCRIPTION="This is an example of an archive backup
-    Backup Pictures"
+# Will archive the Pictures directory in theq
+# HOME directory, but will skip any .jpg files
 BACKUP_NAME="example01"
 BACKUP_TYPE="ARCHIVE"
-SOURCE="*"
+SOURCE_FILES=("Pictures")
 DESTINATION="$PWD"
-WORKING_PATH="$HOME/Pictures"
-EXCLUDE_FILE="$PWD/examples/example01.x"
+WORKING_PATH="$HOME"
+EXCLUDE_FILES=("*.jpg")

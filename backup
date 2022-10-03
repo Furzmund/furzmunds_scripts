@@ -62,7 +62,7 @@ CheckInputs() {
         fi
     fi
 
-    if [ -z "$SOURCE" ]; then
+    if [ -z "$SOURCE_FILES" ]; then
         echo "  Error - Missing required source"
         exit 1
     fi
@@ -97,6 +97,17 @@ CheckInputs() {
 }
 
 
+NamesToFile() {
+    # Write the names given in an
+    # array to the filename given
+    # $1 = array of names
+    # $2 = filename
+    _names=$1[@]
+    names=("${!_names}")
+    printf "%s\n" "${names[@]}" >> $2
+}
+
+
 ArchiveBackup() {
     echo "Starting archive backup.."
     tar \
@@ -104,8 +115,8 @@ ArchiveBackup() {
         --gzip \
         --verbose \
         --file=$BACKUP_PATH \
-        --exclude-from=$EXCLUDE_FILE \
-        $SOURCE
+        --exclude-from=$BACKUP_NAME.ex \
+        --files-from=$BACKUP_NAME.in
     if [ $? -eq 0 ]; then
         echo "Backup complete."
         echo "  $BACKUP_PATH"
@@ -144,14 +155,18 @@ declare BACKUP_EXT=".tar.gz"
 declare DATE_TIME=$(date +"%Y%m%d_%H%M%S")
 declare DRY_RUN="--dry-run"
 
+# Read arguments and config
 ParseArgs "$@"
 echo "Reading configuration file.."
 source $BACKUP_CONFIG
 CheckInputs
 BACKUP_PATH=${DESTINATION}/${BACKUP_NAME}_${DATE_TIME}${BACKUP_EXT}
-printf 'Title:\n  %s\n' "$TITLE"
-printf 'Description:\n  %s\n' "$DESCRIPTION"
 
+# Create include and exclude files
+NamesToFile SOURCE_FILES "$BACKUP_NAME.in"
+NamesToFile EXCLUDE_FILES "$BACKUP_NAME.ex"
+
+# Perform the backup
 if [ $BACKUP_TYPE = "ARCHIVE" ]; then
     ArchiveBackup
 elif [ $BACKUP_TYPE = "SYNC" ]; then
@@ -160,5 +175,9 @@ else
     echo "Error - Bad backup type: '$BACKUP_TYPE'"
     exit 1
 fi
+
+# Clean up
+rm $BACKUP_NAME.in
+rm $BACKUP_NAME.ex
 
 exit 0
