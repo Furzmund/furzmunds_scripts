@@ -155,7 +155,12 @@ declare BACKUP_EXT=".tar.gz"
 declare DATE_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
 declare DRY_RUN="--dry-run"
 
-# Read arguments and config
+# Read arguments
+if [ $# -lt 1 ]; then
+    echo "No arguments given"
+    Help
+    exit 1
+fi
 ParseArgs "$@"
 echo "Reading configuration file.."
 source $BACKUP_CONFIG
