@@ -152,7 +152,7 @@ SyncBackup() {
 #                                Main                               #
 #####################################################################
 declare BACKUP_EXT=".tar.gz"
-declare DATE_TIME=$(date +"%Y%m%d_%H%M%S")
+declare DATE_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
 declare DRY_RUN="--dry-run"
 
 # Read arguments and config
