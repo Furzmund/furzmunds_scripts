@@ -1,12 +1,10 @@
 # Sync Example
-# This will sync the mydocs directory and its contents
-# to a copy of inside the myhome directory
+# Will sync source to the dest directory
 
-declare TITLE="Sync Example"
-declare DESCRIPTION="Configuration example of synchronisation"
-declare BACKUP_NAME="example02"
-declare BACKUP_TYPE="SYNC"
-declare SOURCE="mydocs"
-declare DESTINATION="myhome"
-declare WORKING_PATH="$PWD"
-declare EXCLUDE_FILE="$PWD/examples/example02.x"
+BACKUP_NAME="example02"
+BACKUP_TYPE="SYNC"
+DESTINATION="examples/sync/dest"
+EXCLUDE_FILES=("secret.txt")
+LOG_FILE="$PWD/log.txt"
+SOURCE_FILES="examples/sync/source"
+WORKING_PATH="$PWD"

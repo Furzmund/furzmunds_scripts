@@ -97,7 +97,7 @@ CheckInputs() {
 }
 
 
-NamesToFile() {
+ArrayToFile() {
     # Write the names given in an
     # array to the filename given
     # $1 = array of names
@@ -131,18 +131,18 @@ SyncBackup() {
     rsync \
         --archive \
         --delete-after \
-        --exclude-from="$EXCLUDE_FILE" \
+        --exclude-from="$BACKUP_NAME.ex" \
         --human-readable \
         --verbose \
         $DRY_RUN \
-        $SOURCE \
+        $SOURCE_FILES \
         $DESTINATION \
         | tee $LOG_FILE
     if [ $? -eq 0 ]; then
         echo "Sync complete."
     else
         echo "Error syncing"
-        echo "  $SOURCE"
+        echo "  $SOURCE_FILES"
         echo "  $DESTINATION"
     fi
 }
@@ -167,12 +167,12 @@ source $BACKUP_CONFIG
 CheckInputs
 BACKUP_PATH=${DESTINATION}/${BACKUP_NAME}_${DATE_TIME}${BACKUP_EXT}
 
-# Create include and exclude files
-NamesToFile SOURCE_FILES "$BACKUP_NAME.in"
-NamesToFile EXCLUDE_FILES "$BACKUP_NAME.ex"
+# Create exclude file
+ArrayToFile EXCLUDE_FILES "$BACKUP_NAME.ex"
 
 # Perform the backup
 if [ $BACKUP_TYPE = "ARCHIVE" ]; then
+    ArrayToFile SOURCE_FILES "$BACKUP_NAME.in"
     ArchiveBackup
 elif [ $BACKUP_TYPE = "SYNC" ]; then
     SyncBackup
@@ -182,7 +182,11 @@ else
 fi
 
 # Clean up
-rm $BACKUP_NAME.in
-rm $BACKUP_NAME.ex
+if [ -f $BACKUP_NAME.in ]; then
+    rm $BACKUP_NAME.in
+fi
+if [ -f $BACKUP_NAME.ex ]; then
+    rm $BACKUP_NAME.ex
+fi
 
 exit 0
