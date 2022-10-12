@@ -38,8 +38,11 @@ Performs backups either by archiving files (tar.gz) or
 by synching files between two locations (rsync).
 
 Usage:
+    backup [CONFIG.bc] [options]
+
+Options:
     -h, --help          Display this help
-    -n, --no-dry-run    Skip dry-run when synching
+    -n, --no-dry-run    Skip dry-run (sync only)
     -v, --version       Display the version
 "
 }
