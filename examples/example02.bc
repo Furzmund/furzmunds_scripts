@@ -1,0 +1,10 @@
+# Sync Example
+# Will sync source to the dest directory
+
+BACKUP_NAME="example02"
+BACKUP_TYPE="SYNC"
+DESTINATION="examples/sync/dest"
+EXCLUDE_FILES=("secret.txt")
+LOG_FILE="$PWD/log.txt"
+SOURCE_FILES="examples/sync/source"
+WORKING_PATH="$PWD"

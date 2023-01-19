@@ -1,0 +1,195 @@
+#!/bin/bash
+
+ParseArgs() {
+    while test $# -gt 0; do
+        _KEY="$1"
+        case "$_KEY" in
+            -n|--no-dry-run)
+                DRY_RUN=""
+                ;;
+            -h|--help)
+                Help
+                exit 0
+                ;;
+            -v|--version)
+                Version
+                exit 0
+                ;;
+            -*|--*)
+                echo "Unknown argument: $_KEY"
+                exit 1
+                ;;
+            *)  # One positional argument
+                BACKUP_CONFIG=$1
+                if [ ! -f $BACKUP_CONFIG ]; then
+                    echo "Backup configuration file not found: $BACKUP_CONFIG"
+                    exit 1
+                fi
+                ;;
+        esac
+        shift
+    done
+}
+
+
+Help() {
+    echo "
+Performs backups either by archiving files (tar.gz) or
+by synching files between two locations (rsync).
+
+Usage:
+    backup [CONFIG.bc] [options]
+
+Options:
+    -h, --help          Display this help
+    -n, --no-dry-run    Skip dry-run (sync only)
+    -v, --version       Display the version
+"
+}
+
+
+Version() {
+    echo "Furzmund Backup v0.0.1"
+}
+
+CheckInputs() {
+    # Validate configuration file inputs
+    # Change to working directory if given
+    if [ -z $BACKUP_TYPE ]; then
+        echo "Error - Missing required backup type"
+    else
+        if [ $BACKUP_TYPE != "ARCHIVE" ] && [ $BACKUP_TYPE != "SYNC" ]; then
+            echo "Error - Invalid backup type: '$BACKUP_TYPE'"
+            echo "  Valid types: ARCHIVE or SYNC"
+            exit 1
+        fi
+    fi
+
+    if [ -z "$SOURCE_FILES" ]; then
+        echo "  Error - Missing required source"
+        exit 1
+    fi
+
+    if [ -z $DESTINATION ]; then
+        echo "Error - Missing required destination"
+        exit 1
+    elif [ ! -d $DESTINATION ]; then
+        echo "  Backup destination does not exist. Attempting to create:"
+        echo "    $DESTINATION"
+        mkdir -p $DESTINATION
+        if [ $? -ne 0 ]; then
+            echo "Error - Unable to create destination path: $DESTINATION"
+            exit 1
+        else
+            echo "    Created directory at $DESTINATION"
+        fi
+    fi
+
+    if [ -z $WORKING_PATH ]; then
+        # If no working path, then the source must be an absolute path
+        if [ ! -d $SOURCE ]; then
+            echo "Error - Source does not exist or is a relative path:"
+            echo "  $SOURCE"
+            echo "  Either add a working directory or enter an existing source path"
+            exit 1
+        fi
+    else
+        # tar --directory or -C does not work when source is a pattern
+        cd $WORKING_PATH
+    fi
+}
+
+
+ArrayToFile() {
+    # Write the names given in an
+    # array to the filename given
+    # $1 = array of names
+    # $2 = filename
+    _names=$1[@]
+    names=("${!_names}")
+    printf "%s\n" "${names[@]}" >> $2
+}
+
+
+ArchiveBackup() {
+    echo "Starting archive backup.."
+    tar \
+        --create \
+        --gzip \
+        --verbose \
+        --file=$BACKUP_PATH \
+        --exclude-from=$BACKUP_NAME.ex \
+        --files-from=$BACKUP_NAME.in
+    if [ $? -eq 0 ]; then
+        echo "Backup complete."
+        echo "  $BACKUP_PATH"
+    else
+        echo "Error - creating backup file"
+    fi
+}
+
+
+SyncBackup() {
+    echo "Starting sync.."
+    rsync \
+        --archive \
+        --delete-after \
+        --exclude-from="$BACKUP_NAME.ex" \
+        --human-readable \
+        --verbose \
+        $DRY_RUN \
+        $SOURCE_FILES \
+        $DESTINATION \
+        | tee $LOG_FILE
+    if [ $? -eq 0 ]; then
+        echo "Sync complete."
+    else
+        echo "Error syncing"
+        echo "  $SOURCE_FILES"
+        echo "  $DESTINATION"
+    fi
+}
+
+
+#####################################################################
+#                                Main                               #
+#####################################################################
+declare BACKUP_EXT=".tar.gz"
+declare DATE_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
+declare DRY_RUN="--dry-run"
+
+# Read arguments
+if [ $# -lt 1 ]; then
+    echo "No arguments given"
+    Help
+    exit 1
+fi
+ParseArgs "$@"
+echo "Reading configuration file.."
+source $BACKUP_CONFIG
+CheckInputs
+BACKUP_PATH=${DESTINATION}/${BACKUP_NAME}_${DATE_TIME}${BACKUP_EXT}
+
+# Create exclude file
+ArrayToFile EXCLUDE_FILES "$BACKUP_NAME.ex"
+
+# Perform the backup
+if [ $BACKUP_TYPE = "ARCHIVE" ]; then
+    ArrayToFile SOURCE_FILES "$BACKUP_NAME.in"
+    ArchiveBackup
+elif [ $BACKUP_TYPE = "SYNC" ]; then
+    SyncBackup
+else
+    echo "Error - Bad backup type: '$BACKUP_TYPE'"
+    exit 1
+fi
+
+# Clean up
+if [ -f $BACKUP_NAME.in ]; then
+    rm $BACKUP_NAME.in
+fi
+if [ -f $BACKUP_NAME.ex ]; then
+    rm $BACKUP_NAME.ex
+fi
+
+exit 0

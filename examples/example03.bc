@@ -1,0 +1,6 @@
+BACKUP_NAME="home"
+BACKUP_TYPE="ARCHIVE"
+DESTINATION="$PWD"
+EXCLUDE_FILES=("*.png" "Screenshots")
+SOURCE_FILES=(".bashrc" ".ssh" ".gitconfig" ".bash_aliases" ".gnupg" "Pictures")
+WORKING_PATH=$HOME

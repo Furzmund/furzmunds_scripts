@@ -1,2 +1,33 @@
-# furzmunds_scripts
-Helpful scripts for Linux
+# Scripts
+1. ## Backup
+    ### Types of backups
+    - Archive - Full backup to tar.gz file
+    - Sync - Syncronised from source to destination based on changes
+
+    ### How To
+    Create a backup configuration file using the fields in the table below
+
+    *See also the examples in the repo*
+
+    | Field         | Description                         | Values or Examples          |
+    | ------------- | ----------------------------------- | --------------------------- |
+    | BACKUP_NAME   | Identifier and part of the filename | Valid filename              |
+    | BACKUP_TYPE   | Type of backup desired              | ARCHIVE or SYNC             |
+    | DESTINATION   | Sync destination path               | Valid directory path        |
+    | EXCLUDE_FILES | BASH array of files/dirs to exclude | ex. ("*.png" "Screenshots") |
+    | SOURCE_FILES  | BASH array of files/dirs to backup  | ex. ("*.png" "Screenshots") |
+    | WORKING_PATH  | The path in which to run            | Valid directory path        |
+
+    ### Backup Configuration Example
+    ```bash
+    BACKUP_NAME="photos"
+    BACKUP_TYPE="ARCHIVE"
+    DESTINATION="$HOME/backups"
+    EXCLUDE_FILES=("*.png" "Screenshots")
+    SOURCE_FILES=("Pictures")
+    WORKING_PATH=$HOME
+    ```
+
+    Run the backup script using the configuration file
+
+    ```backup [CONFIG.bc] [OPTIONS,..]```

@@ -1,0 +1,8 @@
+# Will archive the Pictures directory in theq
+# HOME directory, but will skip any .jpg files
+BACKUP_NAME="example01"
+BACKUP_TYPE="ARCHIVE"
+SOURCE_FILES=("Pictures")
+DESTINATION="$PWD"
+WORKING_PATH="$HOME"
+EXCLUDE_FILES=("*.jpg")
