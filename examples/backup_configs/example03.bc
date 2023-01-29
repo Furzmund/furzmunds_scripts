@@ -1,6 +1,9 @@
+# Archives the given sources
+# save the excluded files/directires
+
 BACKUP_NAME="home"
 BACKUP_TYPE="ARCHIVE"
-DESTINATION="$PWD"
+DESTINATION="$HOME/backups"
 EXCLUDE_FILES=("*.png" "Screenshots")
 SOURCE_FILES=(".bashrc" ".ssh" ".gitconfig" ".bash_aliases" ".gnupg" "Pictures")
 WORKING_PATH=$HOME

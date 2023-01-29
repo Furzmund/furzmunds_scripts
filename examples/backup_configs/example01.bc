@@ -1,6 +1,7 @@
-# Will archive the Pictures directory in theq
+# Will archive the Pictures directory in the
 # HOME directory, but will skip any .jpg files
-BACKUP_NAME="example01"
+
+BACKUP_NAME="pictures"
 BACKUP_TYPE="ARCHIVE"
 SOURCE_FILES=("Pictures")
 DESTINATION="$PWD"

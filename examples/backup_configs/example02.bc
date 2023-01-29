@@ -1,10 +1,10 @@
-# Sync Example
 # Will sync source to the dest directory
+# and will exclude the file, "secret.txt"
 
-BACKUP_NAME="example02"
+BACKUP_NAME="sync_example"
 BACKUP_TYPE="SYNC"
-DESTINATION="examples/sync/dest"
+DESTINATION="$HOME/dest"
 EXCLUDE_FILES=("secret.txt")
 LOG_FILE="$PWD/log.txt"
-SOURCE_FILES="examples/sync/source"
+SOURCE_FILES="$HOME/source"
 WORKING_PATH="$PWD"
