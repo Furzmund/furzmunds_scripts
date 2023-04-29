@@ -1,0 +1,20 @@
+#!/bin/bash
+
+RAMDISK_TITLE='ramdisk'
+
+if [[ -z ${RAMDISK_PATH} ]]; then
+    RAMDISK_PATH=${HOME}/ramdisk
+fi
+if [[ -z ${RAMDISK_SIZE} ]]; then
+    RAMDISK_SIZE=100m
+fi
+
+if [[ -d "${RAMDISK_PATH}" ]]; then
+    echo "Dismounting ramdisk at ${RAMDISK_PATH}"
+    sudo umount ${RAMDISK_PATH}
+    rmdir ${RAMDISK_PATH}
+else
+    mkdir ${RAMDISK_PATH}
+    sudo mount -t tmpfs -o size=${RAMDISK_SIZE} ${RAMDISK_TITLE} ${RAMDISK_PATH}
+    echo "Mounted ramdisk at ${RAMDISK_PATH} of size ${RAMDISK_SIZE}"
+fi

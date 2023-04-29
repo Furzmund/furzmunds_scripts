@@ -31,3 +31,17 @@
     Run the backup script using the configuration file
 
     ```backup [CONFIG.bc] [OPTIONS,..]```
+
+2. ## RamDisk
+    ### How To Use
+
+    Type `ramdisk` to mount the disk
+
+    Type `ramdisk` again to dismount the disk
+
+    ### Environment Variables
+
+    | Field         | Description                         | Values or Examples          |
+    | --- | --- | --- |
+    | RAMDISK_PATH | Mount path for the ram disk | /mnt/myramdisk |
+    | RAMDISK_SIZE | Size of the ram disk (Be mindful of how much ram is available) | 100m |
