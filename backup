@@ -136,6 +136,7 @@ SyncBackup() {
         --delete-after \
         --exclude-from="$BACKUP_NAME.ex" \
         --human-readable \
+        --progress \
         --verbose \
         $DRY_RUN \
         $SOURCE_FILES \
