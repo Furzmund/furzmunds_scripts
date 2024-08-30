@@ -45,3 +45,7 @@
     | --- | --- | --- |
     | RAMDISK_PATH | Mount path for the ram disk | /mnt/myramdisk |
     | RAMDISK_SIZE | Size of the ram disk (Be mindful of how much ram is available) | 100m |
+
+3. ## Pip Scripts
+
+    See [Pip Scripts README](./pip/README.md)
